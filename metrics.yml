@@ -1,0 +1,18 @@
+metrics:
+  - name: completeness_customer_id
+    definition: "% of non-null customer_id"
+    current_value: 99.4
+    threshold: "> 98%"
+    cadence: every run
+
+  - name: uniqueness_order_id
+    definition: "% of unique order_id"
+    current_value: 100
+    threshold: "100%"
+    cadence: every run
+
+  - name: data_freshness
+    definition: "time since last update"
+    current_value: "2 hours"
+    threshold: "< 24h"
+    cadence: daily

@@ -1,0 +1,78 @@
+product_name: Customer Orders Gold Dataset
+
+product_owner: Natalia Kotarba
+
+product_purpose: >
+  This data product provides cleaned and aggregated customer order data
+  following the Medallion Architecture (Bronze → Silver → Gold).
+  It is designed for analytics, reporting, and dashboarding.
+
+data_sources:
+  - raw_orders (source system / API / CSV)
+  - raw_customers
+
+schema:
+  - name: order_id
+    type: string
+    description: Unique identifier of the order
+
+  - name: customer_id
+    type: string
+    description: Unique identifier of the customer
+
+  - name: order_date
+    type: timestamp
+    description: Date when the order was placed
+
+  - name: price
+    type: float
+    description: Total order value
+
+  - name: updated_at
+    type: timestamp
+    description: Last update timestamp
+
+refresh_frequency: daily
+
+access_method: >
+  Data is available as a table in the Gold layer (e.g. Snowflake / Delta / Parquet).
+  It can be queried using SQL or accessed via Python.
+
+quality_metrics:
+  - name: completeness_customer_id
+    definition: Percentage of non-null customer_id values
+    threshold: "> 98%"
+    cadence: every pipeline run
+
+  - name: uniqueness_order_id
+    definition: Percentage of unique order_id values
+    threshold: "100%"
+    cadence: every pipeline run
+
+  - name: data_freshness
+    definition: Time since last update
+    threshold: "< 24 hours"
+    cadence: daily
+
+  - name: valid_price
+    definition: Percentage of records where price > 0
+    threshold: "> 99%"
+    cadence: every pipeline run
+
+known_limitations:
+  - Data may be delayed if upstream ingestion fails
+  - Historical data corrections are not backfilled automatically
+  - Some optional fields may contain null values
+
+example_usage:
+  sql: |
+    SELECT customer_id, SUM(price) AS total_spent
+    FROM gold_table
+    GROUP BY customer_id
+    ORDER BY total_spent DESC;
+
+  python: |
+    import pandas as pd
+
+    df = spark.read.table("gold_table")
+    df.groupBy("customer_id").sum("price").show()
